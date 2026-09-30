@@ -16,8 +16,6 @@ def get_db_connection():
         database=os.getenv("DB_NAME")
     )
 
-    return connection
-
 
 @app.route("/")
 def home():
@@ -27,12 +25,10 @@ def home():
 # GET - Get all job applications
 @app.route("/api/jobs", methods=["GET"])
 def get_jobs():
-
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
 
     cursor.execute("SELECT * FROM job_applications")
-
     jobs = cursor.fetchall()
 
     cursor.close()
@@ -40,10 +36,10 @@ def get_jobs():
 
     return jsonify(jobs)
 
+
 # GET - Get a single job application
 @app.route("/api/jobs/<int:job_id>", methods=["GET"])
 def get_job(job_id):
-
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
 
@@ -66,19 +62,17 @@ def get_job(job_id):
 
     return jsonify(job)
 
+
 # POST - Add a new job application
 @app.route("/api/jobs", methods=["POST"])
 def add_job():
-
     data = request.get_json()
 
-    # Check whether JSON data was provided
     if not data:
         return jsonify({
             "error": "Request body is required"
         }), 400
 
-    # Check required fields
     if not data.get("company"):
         return jsonify({
             "error": "Company is required"
@@ -105,7 +99,6 @@ def add_job():
         INSERT INTO job_applications (company, role, status)
         VALUES (%s, %s, %s)
     """
-
     values = (company, role, status)
 
     cursor.execute(sql, values)
@@ -121,9 +114,10 @@ def add_job():
         "id": new_id
     }), 201
 
+
+# PUT - Update a job application
 @app.route("/api/jobs/<int:job_id>", methods=["PUT"])
 def update_job(job_id):
-
     data = request.get_json()
 
     if not data:
@@ -151,11 +145,9 @@ def update_job(job_id):
         SET company = %s, role = %s, status = %s
         WHERE id = %s
     """
-
     values = (company, role, status, job_id)
 
     cursor.execute(sql, values)
-    connection.commit()
 
     if cursor.rowcount == 0:
         cursor.close()
@@ -164,6 +156,8 @@ def update_job(job_id):
             "message": "Job application not found"
         }), 404
 
+    connection.commit()
+
     cursor.close()
     connection.close()
 
@@ -171,22 +165,25 @@ def update_job(job_id):
         "message": "Job application updated successfully"
     }), 200
 
+
+# DELETE - Delete a job application
 @app.route("/api/jobs/<int:job_id>", methods=["DELETE"])
 def delete_job(job_id):
-
-    connection = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="Veera@123#*",
-        database="job_tracker"
-    )
-
+    connection = get_db_connection()
     cursor = connection.cursor()
 
     sql = "DELETE FROM job_applications WHERE id = %s"
     values = (job_id,)
 
     cursor.execute(sql, values)
+
+    if cursor.rowcount == 0:
+        cursor.close()
+        connection.close()
+        return jsonify({
+            "message": "Job application not found"
+        }), 404
+
     connection.commit()
 
     cursor.close()
@@ -194,7 +191,7 @@ def delete_job(job_id):
 
     return jsonify({
         "message": "Job application deleted successfully"
-    })
+    }), 200
 
 
 if __name__ == "__main__":
