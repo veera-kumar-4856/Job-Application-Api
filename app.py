@@ -63,6 +63,117 @@ def get_job(job_id):
     return jsonify(job)
 
 
+# GET - Search jobs by company
+@app.route("/api/jobs/search", methods=["GET"])
+def search_jobs():
+    company = request.args.get("company")
+
+    if not company:
+        return jsonify({
+            "message": "Company parameter is required"
+        }), 400
+
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    sql = "SELECT * FROM job_applications WHERE company = %s"
+    cursor.execute(sql, (company,))
+
+    jobs = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return jsonify(jobs)
+
+# GET - Search jobs by role
+@app.route("/api/jobs/search/role", methods=["GET"])
+def search_jobs_by_role():
+
+    role = request.args.get("role")
+
+    if not role:
+        return jsonify({
+            "message": "Role parameter is required"
+        }), 400
+
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    sql = "SELECT * FROM job_applications WHERE role = %s"
+    cursor.execute(sql, (role,))
+
+    jobs = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return jsonify(jobs)
+
+# GET - Filter jobs by status
+@app.route("/api/jobs/filter", methods=["GET"])
+def filter_jobs():
+
+    status = request.args.get("status")
+
+    if not status:
+        return jsonify({
+            "message": "Status parameter is required"
+        }), 400
+
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    sql = "SELECT * FROM job_applications WHERE status = %s"
+    cursor.execute(sql, (status,))
+
+    jobs = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return jsonify(jobs)
+
+# GET - Filter jobs by multiple conditions
+@app.route("/api/jobs/advanced-filter", methods=["GET"])
+def advanced_filter():
+
+    company = request.args.get("company")
+    role = request.args.get("role")
+    status = request.args.get("status")
+
+    if not company and not role and not status:
+        return jsonify({
+            "message": "At least one filter parameter is required"
+        }), 400
+
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    query = "SELECT * FROM job_applications WHERE 1=1"
+    values = []
+
+    if company:
+        query += " AND company = %s"
+        values.append(company)
+
+    if role:
+        query += " AND role = %s"
+        values.append(role)
+
+    if status:
+        query += " AND status = %s"
+        values.append(status)
+
+    cursor.execute(query, tuple(values))
+
+    jobs = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return jsonify(jobs)
+
 # POST - Add a new job application
 @app.route("/api/jobs", methods=["POST"])
 def add_job():

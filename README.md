@@ -1,8 +1,24 @@
 # Job Application API
 
 A RESTful Job Application Management API built using **Python, Flask, and MySQL**.
+The API allows users to create, view, update, delete, search, and filter job application records.
 
-This API allows users to create, view, update, and delete job application records.
+## Features
+
+* Create a new job application
+* Get all job applications
+* Get a single job application by ID
+* Update an existing job application
+* Delete a job application
+* Search jobs by company
+* Search jobs by role
+* Filter jobs by application status
+* Advanced filtering using company, role, and status
+* Input validation
+* Error handling
+* MySQL database integration
+* Environment variables using `.env`
+* API testing using Postman
 
 ## Technologies Used
 
@@ -12,7 +28,8 @@ This API allows users to create, view, update, and delete job application record
 * MySQL Connector/Python
 * python-dotenv
 * Postman
-* Git & GitHub
+* Git
+* GitHub
 
 ## Project Structure
 
@@ -22,49 +39,49 @@ Job-Application-Api-Test/
 ├── app.py
 ├── test_db.py
 ├── requirements.txt
+├── README.md
 ├── .env
 ├── .gitignore
-├── README.md
 └── venv/
 ```
 
 ## Database
 
-The project uses a MySQL database named:
+The project uses a MySQL database with a `job_applications` table.
+
+### Table Structure
+
+| Column  | Description                      |
+| ------- | -------------------------------- |
+| id      | Unique ID of the job application |
+| company | Company name                     |
+| role    | Job role                         |
+| status  | Application status               |
+
+Example data:
 
 ```text
-job_tracker
+TCS        | Python Developer | Interview
+Zoho       | Developer        | Interview
+Infosys    | Python Developer | Applied
+HCL        | Backend Developer| Applied
+Accenture  | Python Developer | Interview
 ```
-
-The main table is:
-
-```text
-job_applications
-```
-
-The table contains:
-
-| Column  | Description               |
-| ------- | ------------------------- |
-| id      | Unique job application ID |
-| company | Company name              |
-| role    | Job role                  |
-| status  | Application status        |
 
 ## Environment Variables
 
-Database credentials are stored in a `.env` file.
+Create a `.env` file in the project root:
 
 ```env
 DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=job_tracker
+DB_USER=your_mysql_username
+DB_PASSWORD=your_mysql_password
+DB_NAME=your_database_name
 ```
 
-**Note:** The `.env` file should not be uploaded to GitHub.
+The `.env` file should not be committed to GitHub.
 
-## Running the Project
+## Installation
 
 ### 1. Clone the repository
 
@@ -78,11 +95,13 @@ git clone https://github.com/veera-kumar-4856/Job-Application-Api.git
 cd Job-Application-Api
 ```
 
-### 3. Create and activate a virtual environment
+### 3. Create a virtual environment
 
 ```bash
 python -m venv venv
 ```
+
+### 4. Activate the virtual environment
 
 Windows:
 
@@ -90,17 +109,21 @@ Windows:
 venv\Scripts\activate
 ```
 
-### 4. Install dependencies
+### 5. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 5. Configure `.env`
+### 6. Configure MySQL
 
-Create a `.env` file in the project root and add your MySQL credentials.
+Create the required database and `job_applications` table in MySQL.
 
-### 6. Run the Flask application
+### 7. Configure `.env`
+
+Add your MySQL credentials to the `.env` file.
+
+### 8. Run the Flask application
 
 ```bash
 python app.py
@@ -112,36 +135,97 @@ The API will run at:
 http://127.0.0.1:5000
 ```
 
-## API Endpoints
+---
 
-### 1. Get All Job Applications
+# API Endpoints
 
-```http
-GET /api/jobs
+## 1. Home
+
+**GET**
+
+```text
+/
 ```
 
 Example:
 
 ```text
-http://127.0.0.1:5000/api/jobs
+GET http://127.0.0.1:5000/
 ```
 
-### 2. Get a Single Job Application
+Response:
 
-```http
-GET /api/jobs/<id>
+```text
+Job Application API is running!
+```
+
+---
+
+## 2. Get All Job Applications
+
+**GET**
+
+```text
+/api/jobs
 ```
 
 Example:
 
 ```text
-http://127.0.0.1:5000/api/jobs/6
+GET http://127.0.0.1:5000/api/jobs
 ```
 
-### 3. Add a Job Application
+Returns all job applications.
 
-```http
-POST /api/jobs
+---
+
+## 3. Get a Job Application by ID
+
+**GET**
+
+```text
+/api/jobs/<job_id>
+```
+
+Example:
+
+```text
+GET http://127.0.0.1:5000/api/jobs/6
+```
+
+Example response:
+
+```json
+{
+    "company": "Accenture",
+    "id": 6,
+    "role": "Python Developer",
+    "status": "Interview"
+}
+```
+
+If the ID does not exist:
+
+```json
+{
+    "message": "Job application not found"
+}
+```
+
+---
+
+## 4. Add a Job Application
+
+**POST**
+
+```text
+/api/jobs
+```
+
+Example:
+
+```text
+POST http://127.0.0.1:5000/api/jobs
 ```
 
 Request body:
@@ -154,10 +238,43 @@ Request body:
 }
 ```
 
-### 4. Update a Job Application
+Successful response:
 
-```http
-PUT /api/jobs/<id>
+```json
+{
+    "id": 8,
+    "message": "Job application added successfully"
+}
+```
+
+### Required Fields
+
+* `company`
+* `role`
+* `status`
+
+Example validation response:
+
+```json
+{
+    "error": "Company is required"
+}
+```
+
+---
+
+## 5. Update a Job Application
+
+**PUT**
+
+```text
+/api/jobs/<job_id>
+```
+
+Example:
+
+```text
+PUT http://127.0.0.1:5000/api/jobs/6
 ```
 
 Request body:
@@ -170,45 +287,15 @@ Request body:
 }
 ```
 
-### 5. Delete a Job Application
-
-```http
-DELETE /api/jobs/<id>
-```
-
-Example:
-
-```text
-http://127.0.0.1:5000/api/jobs/8
-```
-
-## Validation
-
-The API validates required fields when creating or updating a job application.
-
-For example:
+Successful response:
 
 ```json
 {
-    "error": "Company is required"
+    "message": "Job application updated successfully"
 }
 ```
 
-Other validation messages include:
-
-```json
-{
-    "error": "Role is required"
-}
-```
-
-```json
-{
-    "error": "Status is required"
-}
-```
-
-The API also handles requests for job IDs that do not exist:
+If the job ID does not exist:
 
 ```json
 {
@@ -216,20 +303,242 @@ The API also handles requests for job IDs that do not exist:
 }
 ```
 
-## Testing
+---
+
+## 6. Delete a Job Application
+
+**DELETE**
+
+```text
+/api/jobs/<job_id>
+```
+
+Example:
+
+```text
+DELETE http://127.0.0.1:5000/api/jobs/8
+```
+
+Successful response:
+
+```json
+{
+    "message": "Job application deleted successfully"
+}
+```
+
+If the job ID does not exist:
+
+```json
+{
+    "message": "Job application not found"
+}
+```
+
+---
+
+# Search and Filtering
+
+## 7. Search by Company
+
+**GET**
+
+```text
+/api/jobs/search?company=<company>
+```
+
+Example:
+
+```text
+GET http://127.0.0.1:5000/api/jobs/search?company=TCS
+```
+
+Returns job applications matching the company.
+
+---
+
+## 8. Search by Role
+
+**GET**
+
+```text
+/api/jobs/search/role?role=<role>
+```
+
+Example:
+
+```text
+GET http://127.0.0.1:5000/api/jobs/search/role?role=Python%20Developer
+```
+
+Returns job applications matching the specified role.
+
+---
+
+## 9. Filter by Status
+
+**GET**
+
+```text
+/api/jobs/filter?status=<status>
+```
+
+Example:
+
+```text
+GET http://127.0.0.1:5000/api/jobs/filter?status=Interview
+```
+
+Possible status values used in the project include:
+
+```text
+Applied
+Interview
+```
+
+---
+
+## 10. Advanced Filtering
+
+**GET**
+
+```text
+/api/jobs/advanced-filter
+```
+
+The endpoint supports:
+
+* Company
+* Role
+* Status
+* Multiple filters together
+
+### Company
+
+```text
+GET http://127.0.0.1:5000/api/jobs/advanced-filter?company=Accenture
+```
+
+### Status
+
+```text
+GET http://127.0.0.1:5000/api/jobs/advanced-filter?status=Interview
+```
+
+### Company + Status
+
+```text
+GET http://127.0.0.1:5000/api/jobs/advanced-filter?company=Accenture&status=Interview
+```
+
+### Role + Status
+
+```text
+GET http://127.0.0.1:5000/api/jobs/advanced-filter?role=Python%20Developer&status=Interview
+```
+
+### Company + Role + Status
+
+```text
+GET http://127.0.0.1:5000/api/jobs/advanced-filter?company=Accenture&role=Python%20Developer&status=Interview
+```
+
+If no filter is provided:
+
+```json
+{
+    "message": "At least one filter parameter is required"
+}
+```
+
+---
+
+# Error Handling
+
+The API validates incoming requests and returns appropriate error responses.
+
+### Empty Request Body
+
+```json
+{
+    "error": "Request body is required"
+}
+```
+
+### Missing Company
+
+```json
+{
+    "error": "Company is required"
+}
+```
+
+### Missing Role
+
+```json
+{
+    "error": "Role is required"
+}
+```
+
+### Missing Status
+
+```json
+{
+    "error": "Status is required"
+}
+```
+
+### Job Not Found
+
+```json
+{
+    "message": "Job application not found"
+}
+```
+
+---
+
+# Testing
 
 The API was tested using **Postman**.
 
-Tested operations include:
+The following operations were tested:
 
 * GET all jobs
-* GET a single job
-* POST a new job
-* PUT/update a job
-* DELETE a job
-* Required-field validation
-* Non-existent job ID handling
+* GET job by ID
+* POST job application
+* POST validation
+* PUT job application
+* PUT validation
+* DELETE existing job
+* DELETE non-existing job
+* Search by company
+* Search by role
+* Filter by status
+* Advanced filtering
+* Missing parameter validation
 
-## Author
+Successful responses and error responses were verified using Postman.
 
-Veera Kumar M M
+# Project Purpose
+
+This project was developed to practice:
+
+* REST API development
+* Flask
+* CRUD operations
+* MySQL database connectivity
+* SQL queries
+* API validation
+* HTTP status codes
+* Query parameters
+* Error handling
+* Postman API testing
+* Git and GitHub workflow
+
+# Author
+
+**Veera Kumar M M**
+
+B.Tech Information Technology
